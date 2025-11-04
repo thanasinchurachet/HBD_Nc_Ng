@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Flipbook — Responsive (turn.js)</title>
+</head>
+<body>
+  <script>
+    try { const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0]; if(nav && nav.type === 'reload'){ window.location.replace('../../HBD_9.html'); } } catch(e){}
+  </script>
+  <div class="flipbook" id="flipbook">
+    <!-- Front cover (hard) uses 1.png -->
+    <div class="hard cover"><img src="../../pages/1.png" alt="Cover" /></div>
+    <div class="hard inner-cover"></div>
+
+    <!-- Pages 2..9 -->
+    <div class="page"><img src="../../pages/2.png" alt="Page 2" /></div>
+    <div class="page"><img src="../../pages/3.png" alt="Page 3" /></div>
+    <div class="page"><img src="../../pages/4.png" alt="Page 4" /></div>
+    <div class="page"><img src="../../pages/5.png" alt="Page 5" /></div>
+    <div class="page"><img src="../../pages/6.png" alt="Page 6" /></div>
+    <div class="page"><img src="../../pages/7.png" alt="Page 7" /></div>
+    <div class="page"><img src="../../pages/8.png" alt="Page 8" /></div>
+    <div class="page"><img src="../../pages/9.png" alt="Page 9" /></div>
+
+    <!-- Back cover (hard) uses 10.png -->
+    <div class="hard inner-back"></div>
+    <div class="hard back"><img src="../../pages/10.png" alt="Back cover" /></div>
+  </div>
+
+  <script src="jquery.js"></script>
+  <script src="turn.js"></script>
+  <script>
+    (function(){
+      const $flip = $("#flipbook");
+
+      // Init once with sane defaults
+      $flip.turn({
+        display: 'double',
+        autoCenter: true,
+        gradients: true,
+        acceleration: true,
+        elevation: 30,
+        duration: 700
+      });
+
+      // Correct ratio from actual page size 540x760 (W x H)
+      const PAGE_RATIO = 760 / 540; // height / width per single page
+      const DOUBLE_RATIO = PAGE_RATIO / 2; // height / width for the whole book (two pages)
+      const MIN_PAGE_W = 380;       // do not scale below this width per page
+
+      function computeSize(){
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        // Always show two pages by scaling whole book to fit
+        const PAGE_MIN_W = 160; // min width per page to allow very small screens
+        const maxBookW = vw * 0.98;     // available width for whole book
+        const maxBookH = vh * 0.92;     // available height for whole book
+
+        // Option A: bound by width; resulting height must fit
+        let bookW = maxBookW;
+        let bookH = bookW * DOUBLE_RATIO;
+        if (bookH > maxBookH) {
+          // Option B: bound by height
+          bookH = maxBookH;
+          bookW = bookH / DOUBLE_RATIO;
+        }
+
+        // Clamp per-page width, then recompute consistent book dimensions
+        const perPageW = Math.max(PAGE_MIN_W, Math.floor(bookW / 2));
+        bookW = perPageW * 2;
+        bookH = Math.floor(perPageW * PAGE_RATIO);
+
+        $flip.turn('display','double');
+        $flip.turn('size', Math.round(bookW), Math.round(bookH));
+      }
+
+      // Debounced resize for smoother responsiveness
+      const onResize = (() => {
+        let t = null; 
+        return () => { clearTimeout(t); t = setTimeout(computeSize, 120); };
+      })();
+
+      computeSize();
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', () => setTimeout(computeSize, 150));
+
+      // Tap zones for easier navigation on mobile (optional)
+      document.addEventListener('click', function(e){
+        const rect = $flip[0].getBoundingClientRect();
+        const x = e.clientX;
+        if (x < rect.left) return;
+        if (x > rect.right) return;
+        const leftZone = rect.left + rect.width*0.25;
+        const rightZone = rect.left + rect.width*0.75;
+        if (x <= leftZone) $flip.turn('previous');
+        if (x >= rightZone) $flip.turn('next');
+      });
+    })();
+  </script>
+</body>
+</html>

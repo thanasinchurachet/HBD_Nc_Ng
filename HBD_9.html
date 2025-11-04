@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>HBD — Celebration Lights On + Text Rain</title>
+<style>
+:root{
+  --w: 60vmin;
+  --ground: 7vmin;
+  --candle-top: 31%;
+}
+html,body{height:100%;margin:0}
+body{
+  background:#0b0b0b;
+  color:#fff;
+  font-family:system-ui,-apple-system,'Noto Sans Thai',Segoe UI,Roboto,sans-serif;
+  transition: background 800ms ease, color 800ms ease;
+}
+body.lights-on{
+  background: radial-gradient(1200px 800px at 50% 50%, #ffffff, #f0c4e6 40%, #eaf5ff 75%);
+  color:#222;
+}
+.stage{position:relative;height:100%;overflow:hidden}
+
+/* Cat */
+.cat-wrap{position:absolute;width:var(--w);    left: 50%;;bottom: var(--ground);filter:drop-shadow(0 1.2vmin 2vmin rgba(0,0,0,.55));animation:walkIn 2.8s cubic-bezier(.18,.9,.22,1) forwards; z-index:3}
+.cat {width: 75%;display:block;animation: waddle .6s ease-in-out infinite;transform-origin: 50% 90%; place-self: center;}
+@keyframes walkIn{to{left:calc(50% - (var(--w)/2))}}
+@keyframes waddle{0%,100%{transform:translateY(0) rotate(1.2deg)}50%{transform:translateY(-.8vmin) rotate(-1.2deg)}}
+
+/* Dim + glow (spotlight) */
+.dim{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s ease; z-index:2}
+.dim.on{opacity:1}
+.dim::before{content:"";position:absolute;inset:0;background: radial-gradient(54vmin 40vmin at 50% 66%, rgba(0,0,0,0) 36%, rgba(0,0,0,.72) 60%, rgba(0,0,0,.94) 100%);}
+.glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s ease; z-index:2}
+.glow.on{opacity:1}
+.glow::before{content:"";position:absolute;left:50%;bottom:calc(var(--ground) + 24vmin);transform:translateX(-50%);width:30vmin;height:20vmin;border-radius:50%;
+  background: radial-gradient(closest-side, rgba(255,210,90,.48), rgba(255,210,90,0));filter:blur(20px);top:45%;
+}
+
+/* Cake */
+.cake-assembly{position:absolute;top:45%;left:50%;bottom:var(--ground);transform:translateX(-50%);width:var(--w);display:none;filter:drop-shadow(0 1.3vmin 2.2vmin rgba(0,0,0,.6)); z-index:3}
+.cake-wrap{position:relative;width:100%}
+.candles{position:absolute;inset:0;pointer-events:none}
+
+/* Candles */
+.candle{position:absolute;top:var(--candle-top);transform:translateX(-50%);width:calc(var(--w) * 0.038);height:calc(var(--w) * 0.14);border-radius:.6vmin;pointer-events:auto;cursor:pointer;box-shadow: inset 0 -0.5vmin 0.6vmin rgba(0,0,0,.15)}
+.candle:after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:calc(var(--w) * 0.004);height:calc(var(--w) * 0.026);top:calc(-1 * var(--w) * 0.025);background:#2c2c2c;border-radius:999px}
+.c-red{background: repeating-linear-gradient(135deg, #f36b6b 0 1vmin, #ff8a8a 1vmin 2vmin)}
+.c-teal{background: repeating-linear-gradient(135deg, #3fb3b0 0 1vmin, #6ed3d0 1vmin 2vmin)}
+.c-orange{background: repeating-linear-gradient(135deg, #f49a43 0 1vmin, #ffb86a 1vmin 2vmin)}
+.c-yellow{background: repeating-linear-gradient(135deg, #f2c23e 0 1vmin, #ffe077 1vmin 2vmin)}
+.flame{position:absolute;left:50%;top:calc(-1 * var(--w) * 0.065);transform:translateX(-50%);
+  width:calc(var(--w) * 0.03);height:calc(var(--w) * 0.05);
+  border-radius:60% 60% 60% 60%/70% 70% 40% 40%;
+  background: radial-gradient(40% 40% at 50% 60%, #fff8b8 0%, #ffe38a 35%, #ffbf3e 68%, #ff8f00 100%);
+  filter: drop-shadow(0 0 .6vmin #ffda67) drop-shadow(0 0 1.2vmin #ffb347);
+  animation: flameDance 1.2s ease-in-out infinite;
+}
+.flame::before{content:""; position:absolute; inset:-1vmin -1.2vmin -1.6vmin; border-radius:50%;
+  background: radial-gradient(circle at 50% 70%, rgba(255,220,120,.45), rgba(255,180,0,.05) 70%, transparent 80%);
+  filter: blur(.6vmin); animation: halo 1.2s ease-in-out infinite;}
+.flame::after{content:""; position:absolute; left:50%; top:40%; transform:translateX(-50%);
+  width: calc(var(--w) * 0.008); height: calc(var(--w) * 0.015); border-radius:50%; background:#fff8d6; filter:blur(.2vmin);}
+@keyframes flameDance{0%{transform: translateX(-50%) rotate(-4deg) translateY(-.1vmin) scale(1)}25%{transform: translateX(-50%) rotate(2deg) translateY(-.3vmin) scale(1.08)}50%{transform: translateX(-50%) rotate(-3deg) translateY(0) scale(.95)}75%{transform: translateX(-50%) rotate(3deg) translateY(-.2vmin) scale(1.06)}100%{transform: translateX(-50%) rotate(-4deg) translateY(-.1vmin) scale(1)}}
+@keyframes halo{0%,100%{opacity:.9}50%{opacity:.6}}
+.smoke{position:absolute;left:50%;transform:translateX(-50%);top:calc(-1 * var(--w) * 0.065);width:.3vmin;height:.3vmin;opacity:0;pointer-events:none}
+.smoke.show{opacity:1;animation: smokeUp 1.6s ease-out forwards}
+@keyframes smokeUp{0%{opacity:.66;box-shadow:0 0 0 .3vmin rgba(180,180,180,.55)}40%{opacity:.35;box-shadow:-1vmin -1.8vmin 0 .35vmin rgba(170,170,170,.35),1.2vmin -3.5vmin 0 .25vmin rgba(180,180,180,.28)}100%{opacity:0;box-shadow:-2vmin -4.2vmin 0 .15vmin rgba(170,170,170,.12),1.6vmin -7vmin 0 .1vmin rgba(180,180,180,.08)}}
+
+/* Blow hint bubble */
+.blow-hint{position:absolute;left:25%;top:600px;bottom: calc(var(--ground) + 26vmin);transform:translateX(-50%) rotate(-5deg);
+  padding:.6rem 1rem;font-weight:300;font-size:.8rem;color: white;text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);opacity:0;pointer-events:none; z-index:4}
+.blow-hint.show{opacity:1;animation: blowPop 1.1s ease both;}
+@keyframes blowPop{0%{ transform: translateX(-50%) translateY(6px) scale(.9); opacity:0; }
+20%{ transform: translateX(-50%) translateY(0) scale(1.06); opacity:1; }
+45%{ transform: translateX(-50%) scale(1); }
+100%{ transform: translateX(-50%) translateY(-6px); opacity:0; }}
+
+/* ===== Subtitles ===== */
+.subtitles{position:absolute;left:50%;bottom:max(6vmin, env(safe-area-inset-bottom));transform: translateX(-50%);width:min(92vw,860px);text-align:center;line-height:1.45;letter-spacing:.2px;pointer-events:none;filter: drop-shadow(0 2px 10px rgba(0,0,0,.45));opacity:0;bottom:5px; z-index:4;     bottom:  2%;}
+.subtitles.show{ animation: subFadeIn .6s cubic-bezier(.2,.8,.2,1) forwards; }
+.subtitles.hide{ animation: subFadeOut .6s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes subFadeIn{ from{ opacity:0; transform: translate(-50%, 8px);} to{opacity:1; transform: translate(-50%, 0);} }
+@keyframes subFadeOut{ from{ opacity:1; transform: translate(-50%, 0);} to{opacity:0; transform: translate(-50%, 8px);} }
+.sub-cat{display:inline-block;padding:.28rem .8rem;border-radius:12px;background:rgba(255,255,255,.1);backdrop-filter: blur(4px);font-size: clamp(14px, 2.3vmin, 18px);letter-spacing:.4px;}
+.sub-th{margin-top:.35rem;font-size:clamp(13px, 2.2vmin, 16px);color:#eaeaea;opacity:.95}
+
+/* Celebration: confetti & text */
+#confettiCanvas{position:absolute;inset:0;display:none; z-index:5}
+#textRain{position:absolute;inset:0;pointer-events:none;display:none; z-index:6}
+#textRain .drop{
+  position:absolute; top:-10vh; left:0;
+  font-weight:800; letter-spacing:.04em;
+  text-shadow: 0 2px 6px rgba(0,0,0,.25);
+  opacity:0.95;
+  animation: fall 3.5s linear forwards;
+}
+@keyframes fall{
+  0%{ transform: translateY(-10vh) rotate(0deg); opacity:0; }
+  8%{ opacity:1; }
+  100%{ transform: translateY(110vh) rotate(360deg); opacity:1; }
+}
+
+/* Responsive tuning */
+@media (max-width: 1920px){ :root{ --candle-top: 33.5%; } .candle{ width: calc(var(--w)*0.042); height: calc(var(--w)*0.148); top:45px;} }
+@media (max-width: 1440px){ :root{ --candle-top: 34%; }   .candle{ width: calc(var(--w)*0.045); height: calc(var(--w)*0.15); } }
+@media (max-width: 1080px){ :root{ --candle-top: 35%; }   .candle{ width: calc(var(--w)*0.05);  height: calc(var(--w)*0.155); top:45px;} }
+@media (max-width: 768px){  :root{ --candle-top: 36%; }   .candle{ width: calc(var(--w)*0.035); height: calc(var(--w)*0.13); top:38px; } }
+@media (max-width: 545px){  :root{ --candle-top: 36%; }   .candle{ width: calc(var(--w)*0.035); height: calc(var(--w)*0.13); top:38px; } }
+@media (max-width: 388px){  :root{ --candle-top: 36%; }   .candle{ width: calc(var(--w)*0.035); height: calc(var(--w)*0.13); top:23px; } }
+/* Wish hint above cake */
+.wish-hint{ position:absolute; left:50%; top:38%; transform: translateX(-50%); color:#fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); font-weight:600; font-size: clamp(14px, 2.2vmin, 18px); background: rgba(0,0,0,.25); padding:.4rem .8rem; border-radius: 999px; opacity:0; pointer-events:none; z-index:6 }
+.wish-hint.show{ animation: subFadeIn .6s cubic-bezier(.2,.8,.2,1) forwards; } .wish-hint.hide{ animation: subFadeOut .6s cubic-bezier(.2,.8,.2,1) forwards; }
+/* Musical notes while song playing */
+.notes{ position:absolute; inset:0; pointer-events:none; display:none; z-index:6 }
+.notes.show{ display:block }
+.notes .note{ position:absolute; bottom: calc(var(--ground) + 22vmin); color:#fff; text-shadow: 0 2px 6px rgba(0,0,0,.35); opacity:.9; animation: noteFloat 3s linear forwards }
+@keyframes noteFloat{ 0%{ transform: translateY(0) translateX(0) scale(1); opacity:.0 } 10%{ opacity:1 } 100%{ transform: translateY(-36vmin) translateX(6vmin) scale(1.2); opacity:0 } }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="cat-wrap" id="catWrap">
+    <img class="cat" id="catImg" src="img/cat01.png" alt="cat">
+  </div>
+  <div class="dim" id="dim"></div>
+  <div class="glow" id="glow"></div>
+
+  <div class="cake-assembly" id="cakeAssembly">
+    <div class="cake-wrap">
+      <!-- cake svg -->
+      <svg viewBox="0 0 600 430" width="100%" height="auto" aria-label="cake">
+        <defs>
+          <radialGradient id="plateFill" cx="50%" cy="55%" r="70%">
+            <stop offset="0%" stop-color="#d8edf0"/><stop offset="55%" stop-color="#9bc0c3"/><stop offset="100%" stop-color="#6c969a"/>
+          </radialGradient>
+          <linearGradient id="plateRim" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#cfe4e6"/><stop offset="100%" stop-color="#8aaeb2"/>
+          </linearGradient>
+          <linearGradient id="cakeSide" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%"  stop-color="#e7ae6f"/><stop offset="60%" stop-color="#c6864f"/><stop offset="100%" stop-color="#9c6a3d"/>
+          </linearGradient>
+          <radialGradient id="cakeTop" cx="45%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#f6cd95"/><stop offset="80%" stop-color="#d5904a"/><stop offset="100%" stop-color="#c57d3d"/>
+          </radialGradient>
+          <linearGradient id="icing" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#ffd9e1"/><stop offset="100%" stop-color="#f3aeb9"/>
+          </linearGradient>
+          <filter id="softShadow"><feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-opacity="0.25"/></filter>
+          <filter id="innerTop" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="b"/><feOffset dy="1" result="b2"/>
+            <feComposite in="b2" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="inner"/>
+            <feColorMatrix in="inner" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0"/>
+            <feComposite in="SourceGraphic" in2="inner" operator="over"/>
+          </filter>
+        </defs>
+        <g filter="url(#softShadow)">
+          <ellipse cx="300" cy="305" rx="230" ry="46" fill="url(#plateFill)"/>
+          <ellipse cx="300" cy="295" rx="200" ry="30" fill="url(#plateRim)" opacity=".35"/>
+        </g>
+        <g filter="url(#softShadow)">
+          <rect x="140" y="170" width="320" height="145" rx="26" ry="26" fill="url(#cakeSide)"/>
+          <ellipse cx="300" cy="170" rx="160" ry="40" fill="url(#cakeTop)" filter="url(#innerTop)"/>
+          <path d="M140,170 C160,188 192,186 224,170
+                   C244,186 272,189 294,170
+                   C316,191 346,188 366,170
+                   C388,188 418,186 460,170
+                   L460,214
+                   C438,228 418,214 398,210
+                   C376,228 356,216 336,210
+                   C316,228 294,216 274,210
+                   C252,226 234,214 220,208
+                   C202,224 182,214 162,208
+                   L140,206 Z" fill="url(#icing)"/>
+          <ellipse cx="255" cy="158" rx="100" ry="18" fill="white" opacity=".18"/>
+        </g>
+      </svg>
+    </div>
+    <div class="candles" id="candles">
+      <div class="candle c-red" style="left:39%"></div>
+      <div class="candle c-teal" style="left:48.5%"></div>
+      <div class="candle c-orange" style="left:57%"></div>
+      <div class="candle c-yellow" style="left:65.5%"></div>
+    </div>
+  </div>
+
+  <div class="blow-hint" id="blowHint">เป่าอีก เป่าแรงกว่านี้ 💨</div>
+
+  <!-- Subtitles -->
+  <div class="subtitles" id="subWrap" aria-live="polite" aria-atomic="true">
+    <div class="sub-cat" id="subCat"></div>
+    <div class="sub-th" id="subTh"></div>
+  </div>
+
+  <!-- celebration layers -->
+  <canvas id="confettiCanvas"></canvas>
+  <div id="textRain"></div>
+  <div class="wish-hint" id="wishHint"></div>
+  <div class="notes" id="musicNotes"></div>
+</div>
+
+<!-- Envelope overlay to reveal the book -->
+<div class="env-overlay" id="envOverlay" aria-hidden="true">
+  <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="เปิดซองเพื่อดูหนังสือ">
+    <div class="env-body"></div>
+    <div class="env-flap"></div>
+    <div class="env-letter">
+      <div class="env-msg">สุขสันต์วันเกิดนะ 🩷<br/>แตะเพื่อเปิดซอง</div>
+    </div>
+  </div>
+  <div class="env-tip">แตะที่ซองเพื่อเปิดหนังสือ</div>
+  <div class="env-skip" id="envSkip">ข้ามไปดูหนังสือ</div>
+  
+  <style>
+    .env-overlay{ position:fixed; inset:0; background: radial-gradient(1200px 800px at 50% 50%, rgba(255,255,255,.9), rgba(245,240,255,.95) 40%, rgba(235,230,255,.98) 85%); display:none; place-items:center; z-index:20; }
+    .env-overlay.show{ display:grid; animation: envFade .35s ease both; }
+    @keyframes envFade{ from{ opacity:0 } to{ opacity:1 } }
+
+    .envelope{ position:relative; width:min(88vw, 540px); aspect-ratio: 4 / 3; cursor:pointer; perspective:1200px; }
+    .env-body{ position:absolute; inset:20% 6% 6%; background:#fde7ea; border-radius:14px; box-shadow: 0 12px 28px rgba(0,0,0,.15) inset; }
+    .env-flap{ position:absolute; left:6%; right:6%; top:6%; height:38%; background:#ffccda; clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin:50% 0%; transition: transform .7s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 6px 10px rgba(0,0,0,.18)); }
+    .env-letter{ position:absolute; left:10%; right:10%; bottom:10%; top:28%; background:#fff; border-radius:12px; display:grid; place-items:center; box-shadow: 0 16px 24px rgba(0,0,0,.12); transform: translateY(6%); transition: transform .6s ease; }
+    .envelope.open .env-flap{ transform: rotateX(180deg); }
+    .envelope.open .env-letter{ transform: translateY(-36%); }
+    .env-msg{ text-align:center; font-weight:600; color:#6b567a; line-height:1.6; }
+    .env-tip{ margin-top:18px; font-size:14px; color:#6b6b7a; text-align:center; }
+    .env-skip{ position:absolute; bottom:max(12px, env(safe-area-inset-bottom)); right:max(12px, env(safe-area-inset-right)); font-size:12px; color:#6b6b7a; background:rgba(255,255,255,.7); padding:6px 10px; border-radius:999px; cursor:pointer; user-select:none; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .env-skip:hover{ background:#fff; }
+
+    /* Baby overlay shown before envelope */
+    .baby-overlay{ position:fixed; inset:0; display:none; place-items:end center; z-index:19; pointer-events:none; }
+    .baby-overlay.show{ display:grid; }
+    .baby-overlay .baby{ width:min(56vmin, 420px); margin-bottom:max(8vh,60px); filter: drop-shadow(0 10px 22px rgba(0,0,0,.18));
+      animation: babyEnter 2.2s cubic-bezier(.18,.9,.22,1) forwards, babyWobble .6s ease-in-out infinite; transform-origin:50% 90%; }
+    @keyframes babyEnter{ from{ transform: translateX(-120vw); } to{ transform: translateX(0); } }
+    @keyframes babyWobble{ 0%,100%{ transform: translateY(0) rotate(1.2deg) } 50%{ transform: translateY(-6px) rotate(-1.2deg) } }
+  </style>
+</div>
+<!-- Baby overlay (appears after celebration, before envelope) -->
+<div class="baby-overlay" id="babyOverlay" aria-hidden="true">
+  <img src="img/baby.png" alt="baby" class="baby" />
+</div>
+
+<script>
+const catWrap   = document.getElementById('catWrap');
+const catImg    = document.getElementById('catImg');
+const dim = document.getElementById('dim');
+const glow = document.getElementById('glow');
+const cakeAssembly = document.getElementById('cakeAssembly');
+const confettiCanvas = document.getElementById('confettiCanvas');
+const textRain = document.getElementById('textRain');
+const blowHint = document.getElementById('blowHint');
+const subWrap = document.getElementById('subWrap');
+const subCat = document.getElementById('subCat');
+const subTh = document.getElementById('subTh');
+let hasCelebrated = false;
+
+// --- When the cat finishes walking in, play subtitles first, then show cake ---
+const forceShow = setTimeout(()=> startCake(), 9000); // fallback
+catWrap.addEventListener('animationend', (e)=>{
+  if(e.animationName!=='walkIn') return;
+  clearTimeout(forceShow);
+  playSubtitles(startCake);
+}, {once:true});
+
+function startCake(){
+  // HIDE CAT when cake is shown
+  catWrap.style.display = 'none';
+  subWrap.classList.remove('show'); subWrap.classList.add('hide');
+  dim.classList.add('on'); glow.classList.add('on'); cakeAssembly.style.display='block';
+  // Music
+  playHappyBirthday();
+}
+
+// ===== Subtitles logic =====
+const LINES = [
+  {cat:'Meow~ meow meow! 🎁', th:'วันนี้วันเกิดไนท์ไนท์นี่หน่า'},
+  {cat:'Meow… meow meow 🎂', th:'ไคโรเอาเค้กมาให้'},
+  {cat:'Meow… meooow~ 💨', th:'จุดเทียนสักครู่...'}
+];
+const SHOW_MS = 3200; // slower display time per line
+const GAP_MS = 400;   // slightly longer gap
+
+// talking mouth: swap images while subtitle visible
+let talkTimer=null, talking=false;
+function startTalking(){
+  if(talking) return; talking=true;
+  let open=false;
+  talkTimer=setInterval(()=>{ open=!open; catImg.src = open ? 'img/cat01.png' : 'img/cat02.png'; }, 140);
+}
+function stopTalking(){ talking=false; clearInterval(talkTimer); catImg.src='img/cat01.png'; }
+
+function playSubtitles(doneCb){
+  let i=0; subWrap.classList.remove('hide');
+  function next(){
+    if(i>=LINES.length){ stopTalking(); subWrap.classList.remove('show'); subWrap.classList.add('hide'); if(typeof doneCb==='function') setTimeout(doneCb, 250); return; }
+    const {cat, th} = LINES[i++];
+    subCat.textContent = cat; subTh.textContent = th;
+    subWrap.classList.add('show'); startTalking();
+    setTimeout(()=>{ subWrap.classList.remove('show'); subWrap.classList.add('hide'); setTimeout(()=>{ subWrap.classList.remove('hide'); next(); }, GAP_MS); }, SHOW_MS);
+  }
+  next();
+}
+
+// Prepare candles
+const candles = Array.from(document.querySelectorAll('.candle')).map(el=>{
+  const flame=document.createElement('div'); flame.className='flame';
+  const smoke=document.createElement('div'); smoke.className='smoke';
+  el.appendChild(flame); el.appendChild(smoke);
+  smoke.addEventListener('animationend', ()=>{ smoke.classList.remove('show'); smoke.style.opacity=0; });
+  el.addEventListener('click',()=>{ if(!window._canBlow){ const w=document.getElementById('wishHint'); if(w){ w.textContent='รอให้เพลงจบก่อนน้า 🎵'; w.classList.add('show'); setTimeout(()=>w.classList.remove('show'), 1200);} return; } if(el._lit!==false) extinguish(el); });
+  el._lit=true;
+  return {el, flame, smoke};
+});
+function checkAllOut(){ if(!hasCelebrated && candles.every(c=>c.el._lit===false)){ hasCelebrated=true; turnOnLights(); launchConfetti(); rainText(); } }
+function extinguish(target){ if(!window._canBlow) return; target._lit=false; target.querySelector('.flame').style.display='none'; const s=target.querySelector('.smoke'); s.classList.remove('show'); void s.offsetWidth; s.classList.add('show'); checkAllOut(); }
+function firstLit(){ return candles.find(c=>c.el._lit!==false)?.el; }
+
+// ---- Blow hint helpers ----
+let hintCooldown = false, hintTimer = null;
+function showBlowHint(){ if(hintCooldown || !window._canBlow) return; blowHint.classList.remove('show'); void blowHint.offsetWidth; blowHint.classList.add('show'); hintCooldown = true; clearTimeout(hintTimer); hintTimer = setTimeout(()=>{ hintCooldown = false; }, 1200); }
+
+// Mic
+let micStream, audioCtx, analyser, dataArray, cooldown=false;
+const CALIB_FRAMES=120, REQUIRED_FRAMES=8, COOLDOWN_MS=700, EXTRA_BIAS=0.10, MULTIPLIER=6.0;
+let calibrating=true, calibLeft=CALIB_FRAMES, baseline=0, overFrames=0, attemptFrames=0;
+async function enableMic(){ try{
+  micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const src=audioCtx.createMediaStreamSource(micStream);
+  analyser=audioCtx.createAnalyser(); analyser.fftSize=512;
+  dataArray=new Uint8Array(analyser.fftSize); src.connect(analyser);
+  requestAnimationFrame(loopMic);
+}catch(e){console.warn(e);}} 
+function loopMic(){ requestAnimationFrame(loopMic); if(!analyser) return;
+  analyser.getByteTimeDomainData(dataArray);
+  let sum=0; for(let i=0;i<dataArray.length;i++){ const v=(dataArray[i]-128)/128; sum+=v*v; }
+  const rms=Math.sqrt(sum/dataArray.length);
+
+  if(calibrating){ baseline=(baseline*(CALIB_FRAMES - calibLeft) + rms)/Math.max(1,(CALIB_FRAMES - calibLeft + 1)); if(--calibLeft<=0) calibrating=false; return; }
+  if(!window._canBlow){ return; }
+
+  const thresh=Math.max(0.18, baseline*MULTIPLIER + EXTRA_BIAS);
+  const attemptThresh = thresh * 0.6; // "พยายามเป่า"
+  if(rms > attemptThresh && rms < thresh){ attemptFrames++; if(attemptFrames>=4){ showBlowHint(); attemptFrames=0; } }
+  else{ if (rms <= attemptThresh) attemptFrames = 0; }
+
+  if(rms>thresh){ overFrames++; if(overFrames>=REQUIRED_FRAMES && !cooldown){ cooldown=true; overFrames=0; const t=firstLit(); if(t) extinguish(t); setTimeout(()=> cooldown=false, COOLDOWN_MS); } }
+  else{ overFrames=0; }
+}
+window.addEventListener('load', enableMic);
+window.addEventListener('pointerdown', ()=>{ if(!micStream) enableMic(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); if(_pendingMusic) playHappyBirthday(); }, {once:true});
+
+// Music
+let _pendingMusic=false;
+let audio = null;
+window._canBlow = false;
+function playHappyBirthday() {
+  if (audio) return; // ป้องกันเล่นซ้ำ
+  audio = new Audio("music/hbd.mp3");
+  audio.volume = 0.8;
+  audio.addEventListener('ended', ()=>{ showWishSequence(); });
+  audio.play().catch(e => console.log("Play error:", e));
+}
+
+function showWishSequence(){
+  const w = document.getElementById('wishHint');
+  if(!w) { window._canBlow = true; return; }
+  const show = (t)=>{ w.textContent=t; w.classList.remove('hide'); void w.offsetWidth; w.classList.add('show'); };
+  const hide = ()=>{ w.classList.remove('show'); w.classList.add('hide'); };
+  show('หลับตาแล้วอธิษฐานเลย🪄');
+  setTimeout(()=>{ show('เป่าเค้กเลยย 🎂💨'); window._canBlow = true; setTimeout(hide, 7000); }, 7000);
+}
+
+// === Celebration helpers ===
+function turnOnLights(){
+  // remove spotlight overlay and brighten scene
+  dim.classList.remove('on');
+  glow.classList.remove('on');
+  document.body.classList.add('lights-on');
+}
+
+let confettiRunning=false, confettiParticles=[];
+function launchConfetti(){
+  const ctx = confettiCanvas.getContext('2d');
+  confettiCanvas.style.display='block';
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  confettiCanvas.width=w; confettiCanvas.height=h;
+  confettiParticles=[]; confettiRunning=true;
+  const colors=['#ff6b6b','#ffd93d','#6ed3d0','#74c0fc','#b197fc','#ffa94d','#63e6be'];
+  const N=240;
+  for(let i=0;i<N;i++){
+    confettiParticles.push({
+      x: Math.random()*w, y: -10 - Math.random()*h*0.5,
+      vx:(Math.random()-0.5)*1.0, vy:2+Math.random()*3.2,
+      size:4+Math.random()*6, rot:Math.random()*Math.PI*2, vr:(Math.random()-0.5)*0.25,
+      color: colors[(Math.random()*colors.length)|0], shape: Math.random()<0.5?'rect':'tri'
+    });
+  }
+  function step(){
+    if(!confettiRunning) return;
+    const w2=confettiCanvas.width, h2=confettiCanvas.height;
+    ctx.clearRect(0,0,w2,h2);
+    for(const p of confettiParticles){
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.vy+=0.03;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color;
+      if(p.shape==='rect'){ ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); }
+      else{ ctx.beginPath(); ctx.moveTo(0,-p.size/2); ctx.lineTo(p.size/2,p.size/2); ctx.lineTo(-p.size/2,p.size/2); ctx.closePath(); ctx.fill(); }
+      ctx.restore();
+    }
+    if(confettiParticles.some(p=>p.y < h2+20)) requestAnimationFrame(step);
+    else confettiCanvas.style.display='none';
+  }
+  requestAnimationFrame(step);
+}
+
+// Falling text synchronized with confetti
+function rainText(){
+  textRain.innerHTML='';
+  textRain.style.display='block';
+  const words = ['HBD','เย่ๆ','🎉','🎂','💖'];
+  const w = window.innerWidth, h = window.innerHeight;
+  const count = Math.max(24, Math.floor(w/40));
+  
+  // 🎨 ชุดสีพาสเทลน่ารักๆ
+  const pastelColors = [
+    '#FFB6C1', // ชมพูอ่อน (Light Pink)
+    '#FFD4E5', // ชมพูพีช (Pink Peach)
+    '#E0BBE4', // ม่วงลาเวนเดอร์ (Lavender)
+    '#B4E7CE', // เขียวมิ้นท์ (Mint Green)
+    '#FFDAB9', // พีชครีม (Peach Cream)
+    '#C7CEEA', // ฟ้าอ่อน (Periwinkle)
+    '#FFF5BA', // เหลืองอ่อน (Soft Yellow)
+    '#FFE5E5'  // ชมพูนม (Milky Pink)
+  ];
+  
+  for(let i=0;i<count;i++){
+    const span=document.createElement('span');
+    span.className='drop';
+    span.textContent = words[(Math.random()*words.length)|0];
+    const size = 14 + Math.random()*22;
+    span.style.fontSize = size+'px';
+    const x = Math.random()*100;
+    span.style.left = x+'vw';
+    const delay = Math.random()*0.8;
+    const dur = 2.8 + Math.random()*1.6;
+    span.style.animationDuration = dur+'s';
+    span.style.animationDelay = delay+'s';
+    // 🔹 สุ่มจากชุดสีพาสเทล
+    span.style.color = pastelColors[(Math.random()*pastelColors.length)|0];
+    textRain.appendChild(span);
+  }
+  setTimeout(()=>{ textRain.style.display='none'; }, 6000);
+}
+
+// ===== Envelope flow =====
+function showEnvelope(){
+  const overlay = document.getElementById('envOverlay');
+  if(!overlay) return; overlay.classList.add('show');
+}
+function openEnvelope(){
+  const env = document.getElementById('envelope');
+  if(!env) return; env.classList.add('open');
+  setTimeout(()=>{ window.location.href = 'book/book-effect/index.html'; }, 950);
+}
+
+// show envelope shortly after celebration starts
+document.addEventListener('DOMContentLoaded', ()=>{});
+
+// Show cute baby walk, then envelope
+function showBabyThenEnvelope(){
+  const bo = document.getElementById('babyOverlay');
+  if(!bo){ showEnvelope(); return; }
+  bo.classList.add('show');
+  // hide cake while showing baby
+  try{ cakeAssembly.style.display='none'; }catch(e){}
+  const img = bo.querySelector('.baby');
+  const onEnd = (e)=>{
+    if(e.animationName !== 'babyEnter') return; img.removeEventListener('animationend', onEnd);
+    setTimeout(()=>{ bo.classList.remove('show'); window.location.href = 'love letter code/love letter.html'; }, 250);
+  };
+  img.addEventListener('animationend', onEnd);
+}
+
+// Wait for celebration (confetti + text rain) to finish, then show baby and envelope
+function celebrateThen(cb){
+  try{ turnOnLights(); }catch(e){}
+  try{ launchConfetti(); }catch(e){}
+  try{ rainText(); }catch(e){}
+  // text rain hides after ~6000ms; give a small buffer
+  setTimeout(()=>{ if(typeof cb==='function') cb(); }, 6800);
+}
+
+// Replace checkAllOut to chain: celebrate → baby → envelope
+const _checkAllOut_orig = checkAllOut;
+function checkAllOut(){
+  if(!hasCelebrated && candles.every(c=>c.el._lit===false)){
+    hasCelebrated=true;
+    celebrateThen(showBabyThenEnvelope);
+  }
+}
+
+// Interactions for envelope
+document.getElementById('envelope')?.addEventListener('click', openEnvelope);
+document.getElementById('envelope')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openEnvelope(); });
+document.getElementById('envSkip')?.addEventListener('click', ()=>{ window.location.href = 'book/book-effect/index.html'; });
+</script>
+</body>
+</html>

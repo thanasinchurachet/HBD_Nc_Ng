@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="love letter.css" />
+    <title>Love Letter</title>
+    <script>
+      // If user reloads this page directly, restart at the beginning
+      try { const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0]; if(nav && nav.type === 'reload'){ window.location.replace('../HBD_9.html'); } } catch(e){}
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="valentines" id="val">
+        <div class="envelope"></div>
+        <div class="front"></div>
+        <div class="card">
+          <img class="card-img" src="../pages/1.png" alt="card" />
+        </div>
+        <!-- Heart sticker that peels off -->
+        <div class="sticker" id="sticker" aria-hidden="true"></div>
+        <div class="hearts" style="top: 20px;  z-index: 999;">
+          <div class="one"></div>
+          <div class="two"></div>
+          <div class="three"></div>
+          <div class="four"></div>
+          <div class="five"></div>
+        </div>
+      </div>
+      <div class="shadow"></div>
+    </div>
+
+    <script>
+      // Click to peel sticker -> slide card -> go to book
+      const val = document.getElementById('val');
+      let done = false;
+      val.addEventListener('click', () => {
+        if (done) return; done = true;
+        val.classList.add('peel');
+        setTimeout(()=>{
+          val.classList.add('open');
+          setTimeout(()=>{
+            val.classList.add('pull');
+            setTimeout(()=>{ window.location.href = '../book/book-effect/index.html'; }, 900);
+          }, 500);
+        }, 500);
+      });
+    </script>
+  </body>
+</html>
