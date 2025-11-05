@@ -42,7 +42,7 @@
           val.classList.add('open');
           setTimeout(()=>{
             val.classList.add('pull');
-            setTimeout(()=>{ window.location.href = '../book/book-effect/index.html'; }, 900);
+            setTimeout(()=>{ try{ sessionStorage.setItem('autoplay','1'); }catch(e){} window.location.href = '../book/book-effect/index.html'; }, 900);
           }, 500);
         }, 500);
       });

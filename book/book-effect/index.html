@@ -30,6 +30,26 @@
     <div class="hard back"><img src="../../pages/10.png" alt="Back cover" /></div>
   </div>
 
+  <!-- Turntable overlay was removed as requested -->
+
+  <!-- Mini audio player (plays while reading) -->
+  <div class="audio-player" id="audioPlayer" aria-label="Music player">
+    <img id="ap_cover" alt="cover" />
+    <div class="ap-info">
+      <div class="ap-title" id="ap_title">—</div>
+      <div class="ap-bar">
+        <button id="ap_prev"  aria-label="Previous" title="ก่อนหน้า">⏮</button>
+        <button id="ap_toggle" aria-label="Play / Pause" title="Play / Pause">▶</button>
+        <button id="ap_next"  aria-label="Next" title="ถัดไป">⏭</button>
+        <input id="ap_seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek" />
+        <span id="ap_time">0:00</span>
+        <button id="ap_hide"  aria-label="Hide" title="ซ่อนแถบ">▾</button>
+      </div>
+    </div>
+  </div>
+  <button class="audio-fab" id="ap_fab" aria-label="Show player" title="แสดงเครื่องเล่น">▲</button>
+  <audio id="bgm" preload="metadata"></audio>
+
   <script src="jquery.js"></script>
   <script src="turn.js"></script>
   <script>
@@ -87,17 +107,111 @@
       window.addEventListener('resize', onResize);
       window.addEventListener('orientationchange', () => setTimeout(computeSize, 150));
 
-      // Tap zones for easier navigation on mobile (optional)
-      document.addEventListener('click', function(e){
+      // Tap zones + custom drag-from-anywhere helper (does not conflict with turn.js corner drag)
+      let downPos = null, dragFlipped = false;
+      $flip[0].addEventListener('pointerdown', function(e){
+        // ignore controls
+        if (e.target.closest && e.target.closest('.audio-player, .audio-fab')) return;
+        downPos = { x: e.clientX, y: e.clientY };
+        dragFlipped = false;
+      }, { passive:true });
+      $flip[0].addEventListener('pointermove', function(e){
+        if (!downPos || dragFlipped) return;
+        const dx = e.clientX - downPos.x;
+        const dy = e.clientY - downPos.y;
+        if (Math.abs(dx) > 40 && Math.abs(dy) < 80) {
+          // Trigger one flip and let go; turn.js will animate
+          if (dx < 0) $flip.turn('next'); else $flip.turn('previous');
+          dragFlipped = true; // prevent multiple
+        }
+      }, { passive:true });
+      $flip[0].addEventListener('pointerup', function(e){
+        if (!downPos) return; // not a valid down
+        const dx = Math.abs(e.clientX - downPos.x);
+        const dy = Math.abs(e.clientY - downPos.y);
+        downPos = null;
+        // If pointer moved only a little, treat as tap; otherwise it was a drag
+        if (dx + dy > 10 || dragFlipped) return;
         const rect = $flip[0].getBoundingClientRect();
-        const x = e.clientX;
-        if (x < rect.left) return;
-        if (x > rect.right) return;
+        const x = e.clientX, y = e.clientY;
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return;
         const leftZone = rect.left + rect.width*0.25;
         const rightZone = rect.left + rect.width*0.75;
         if (x <= leftZone) $flip.turn('previous');
         if (x >= rightZone) $flip.turn('next');
-      });
+      }, { passive:true });
+
+      // ===== Simple audio player =====
+      const audio = document.getElementById('bgm');
+      const toggle = document.getElementById('ap_toggle');
+      const seek = document.getElementById('ap_seek');
+      const timeEl = document.getElementById('ap_time');
+      const prevBtn = document.getElementById('ap_prev');
+      const nextBtn = document.getElementById('ap_next');
+      const hideBtn = document.getElementById('ap_hide');
+      const fabBtn  = document.getElementById('ap_fab');
+      const player  = document.getElementById('audioPlayer');
+      const apTitle = document.getElementById('ap_title');
+      const apCover = document.getElementById('ap_cover');
+
+      // Playlist (add more here). Removed hbd.mp3 as requested.
+      const PLAYLIST = [
+      '../../music/ดวงใจ - PALMY「Official Lyric Video」.mp3',
+        '../../music/ทะเลสีดำ - Lula,ต้า Paradox【OFFICIAL MV】.mp3',
+        '../../music/ยังไงก็รัก-ไก่ สมพล ปิยะพงศ์สิริ.mp3',
+        '../../music/เพลงรัก - Three Man Down _Official MV_.mp3',
+        '../../music/คู่ชีวิต - COCKTAIL「Official MV (Cut Version)」.mp3',
+        '../../music/LANDOKMAI - เพลงรักเพลงแรก (Blooming) [Official MV].mp3',
+        '../../music/ซูลูปาก้า ตาปาเฮ้ - themoonwillalwaysbewithme  official audio .mp3'
+      ];
+      let index = 0;
+      const toTitle = (path) => decodeURIComponent(path.split('/').pop()).replace(/\.[a-z0-9]+$/i,'');
+      function load(i){
+        index = (i+PLAYLIST.length)%PLAYLIST.length;
+        audio.src = PLAYLIST[index];
+        apTitle.textContent = toTitle(PLAYLIST[index]);
+        // Set default cover (you can change this file)
+        apCover.src = '../../music/poster.gif';
+        apCover.style.display = 'block';
+        audio.load();
+      }
+      load(0);
+      audio.volume = 0.4;
+      const fmt = (s)=>{ s=Math.max(0, s|0); const m=(s/60)|0; const ss=('0'+(s%60)).slice(-2); return m+':'+ss; };
+      function update(){ if(!isNaN(audio.duration)){ seek.max = audio.duration; } seek.value = audio.currentTime||0; timeEl.textContent = fmt(audio.currentTime||0); }
+      toggle.addEventListener('click', ()=>{ if(audio.paused){ audio.play(); toggle.textContent='❚❚'; player.classList.add('playing'); } else { audio.pause(); toggle.textContent='▶'; player.classList.remove('playing'); } });
+      prevBtn.addEventListener('click', ()=>{ if(PLAYLIST.length>1){ load(index-1); audio.play(); toggle.textContent='❚❚'; }});
+      nextBtn.addEventListener('click', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); toggle.textContent='❚❚'; }});
+      seek.addEventListener('input', ()=>{ try{ audio.currentTime = +seek.value; }catch(e){} });
+      audio.addEventListener('timeupdate', update);
+      audio.addEventListener('loadedmetadata', update);
+      audio.addEventListener('ended', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); } else { toggle.textContent='▶'; player.classList.remove('playing'); } });
+
+      // Hide / show player
+      hideBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); player.classList.add('collapsed'); fabBtn.classList.add('show'); });
+      fabBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); player.classList.remove('collapsed'); fabBtn.classList.remove('show'); });
+      // Prevent player clicks from triggering page turn
+      player.addEventListener('click', (ev)=> ev.stopPropagation());
+
+      // Turntable overlay flow
+      // Autoplay after leaving envelope page (if flag is set)
+      try {
+        if (sessionStorage.getItem('autoplay') === '1') {
+          sessionStorage.removeItem('autoplay');
+          let attempts = 0;
+          const tryPlay = () => {
+            audio.play().then(()=>{ toggle.textContent='❚❚'; player.classList.add('playing'); })
+            .catch(()=>{ if(attempts++ < 6) setTimeout(tryPlay, 350); });
+          };
+          tryPlay();
+        }
+      } catch(e) {}
+      // Fallback: first interaction starts audio if paused
+      window.addEventListener('pointerdown', ()=>{
+        if (audio.paused) {
+          audio.play().then(()=>{ toggle.textContent='❚❚'; player.classList.add('playing'); }).catch(()=>{});
+        }
+      }, { once:true });
     })();
   </script>
 </body>
