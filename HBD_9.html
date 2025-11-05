@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
 <title>HBD — Celebration Lights On + Text Rain</title>
 <style>
 :root{
@@ -14,7 +17,7 @@ html,body{height:100%;margin:0}
 body{
   background:#0b0b0b;
   color:#fff;
-  font-family:system-ui,-apple-system,'Noto Sans Thai',Segoe UI,Roboto,sans-serif;
+ font-family: "Sriracha", cursive;
   transition: background 800ms ease, color 800ms ease;
 }
 body.lights-on{
@@ -79,7 +82,7 @@ body.lights-on{
 100%{ transform: translateX(-50%) translateY(-6px); opacity:0; }}
 
 /* ===== Subtitles ===== */
-.subtitles{position:absolute;left:50%;bottom:max(6vmin, env(safe-area-inset-bottom));transform: translateX(-50%);width:min(92vw,860px);text-align:center;line-height:1.45;letter-spacing:.2px;pointer-events:none;filter: drop-shadow(0 2px 10px rgba(0,0,0,.45));opacity:0;bottom:5px; z-index:4;     bottom:  2%;}
+.subtitles{position:absolute;left:50%;bottom:max(6vmin, env(safe-area-inset-bottom));transform: translateX(-50%);width:min(92vw,860px);text-align:center;line-height:1.45;letter-spacing:.2px;pointer-events:none;filter: drop-shadow(0 2px 10px rgba(0,0,0,.45));opacity:0;bottom:5px; z-index:4;     bottom: 85%;}
 .subtitles.show{ animation: subFadeIn .6s cubic-bezier(.2,.8,.2,1) forwards; }
 .subtitles.hide{ animation: subFadeOut .6s cubic-bezier(.2,.8,.2,1) forwards; }
 @keyframes subFadeIn{ from{ opacity:0; transform: translate(-50%, 8px);} to{opacity:1; transform: translate(-50%, 0);} }
@@ -113,13 +116,94 @@ body.lights-on{
 /* Wish hint above cake */
 .wish-hint{ position:absolute; left:50%; top:38%; transform: translateX(-50%); color:#fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); font-weight:600; font-size: clamp(14px, 2.2vmin, 18px); background: rgba(0,0,0,.25); padding:.4rem .8rem; border-radius: 999px; opacity:0; pointer-events:none; z-index:6 }
 .wish-hint.show{ animation: subFadeIn .6s cubic-bezier(.2,.8,.2,1) forwards; } .wish-hint.hide{ animation: subFadeOut .6s cubic-bezier(.2,.8,.2,1) forwards; }
-/* Music start prompt */
-.music-prompt{ position:absolute; inset:0; display:none; place-items:center; background: radial-gradient(1200px 800px at 50% 50%, rgba(0,0,0,.35), rgba(0,0,0,.55)); z-index:7 }
+/* Music start prompt (simple pulsing text) */
+.music-prompt{ 
+  position:absolute; 
+  inset:0; 
+  display:none; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(1200px 800px at 50% 50%, rgba(0,0,0,.30), rgba(0,0,0,.55)); 
+  z-index:7;
+}
+
 .music-prompt.show{ display:grid }
-.mp-card{ background:#fff; color:#333; border-radius:14px; padding:16px 18px; width:min(90vw, 360px); box-shadow:0 12px 28px rgba(0,0,0,.25); text-align:center }
-.mp-title{ font-weight:700; margin-bottom:10px }
-.mp-btn{ border:0; background:#4a3bff; color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; cursor:pointer; box-shadow:0 8px 16px rgba(0,0,0,.18) }
-/* Musical notes while song playing */
+
+.mp-text {
+    font-size: larger;
+  color: #fff;
+  font-weight: 900;
+  background: rgba(0, 0, 0, .35);
+  padding: 16px 18px;
+  border-radius: 999px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .22);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+}
+.mp-label {
+  letter-spacing: .2px;
+  position: relative;
+  z-index: 1;
+  animation: modernPulse 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes modernPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1.03);
+    opacity: 0.95;
+  }
+}
+
+/* 🖐️ Hand pressing animation */
+.mp-hand{ position:relative; width:54px; height:54px; display:grid; place-items:center; }
+.mp-hand .finger{
+  width:22px; height:34px; border-radius:12px; background:#ffffff; position:relative;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.15), 0 4px 10px rgba(0,0,0,.25);
+  transform-origin:50% 90%; animation: fingerPress 1.2s ease-in-out infinite;
+}
+.mp-hand .finger:after{
+  content:""; position:absolute; left:50%; bottom:4px; transform:translateX(-50%);
+  width:16px; height:6px; background:#ffd9d9; border-radius:6px; opacity:.9;
+}
+@keyframes fingerPress{
+  0%,100%{ transform: translateY(0) scale(1) }
+  45%{ transform: translateY(2px) scale(.98) }
+}
+
+/* Ripple rings while pressing */
+.mp-hand .ripple{
+  position:absolute; width:54px; height:54px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.75);
+  animation: tapRipple 1.2s ease-out infinite;
+}
+.mp-hand .ripple.delay{ animation-delay:.35s }
+@keyframes tapRipple{
+  0%{ transform: scale(.7); opacity: .9 }
+  80%{ opacity: .15 }
+  100%{ transform: scale(1.25); opacity: 0 }
+}
+
+.mp-label{ letter-spacing:.2px }
+
+/* เมื่อกำลังรอการกด ให้ซ่อนทุกภาพข้างหลัง เพื่อโฟกัสที่ข้อความ */
+body.await-tap .stage > *:not(.music-prompt){ visibility:hidden !important }
 .notes{ position:absolute; inset:0; pointer-events:none; display:none; z-index:6 }
 .notes.show{ display:block }
 .notes .note{ position:absolute; bottom: calc(var(--ground) + 22vmin); color:#fff; text-shadow: 0 2px 6px rgba(0,0,0,.35); opacity:.9; animation: noteFloat 3s linear forwards }
@@ -205,11 +289,15 @@ body.lights-on{
   <div id="textRain"></div>
   <div class="wish-hint" id="wishHint"></div>
   <div class="notes" id="musicNotes"></div>
-  <div class="music-prompt" id="musicPrompt" aria-modal="true" role="dialog">
-    <div class="mp-card">
-      <div class="mp-title">เริ่มเพลงก่อนเป่าเค้ก</div>
-      <button id="musicStartBtn" class="mp-btn" aria-label="เริ่มเพลง">แตะเพื่อเริ่มเพลง 🎵</button>
-    </div>
+  <div class="music-prompt" id="musicPrompt" aria-modal="true" role="dialog" style="display:none">
+<div class="mp-text" id="musicStartBtn">
+  <div class="mp-hand" aria-hidden="true">
+    <div></div>
+    <div class="ripple"></div>
+    <div class="ripple delay"></div>
+  </div>
+  <span class="mp-label ripple delay">เตะหน้าจอก่อง</span>
+</div>
   </div>
 </div>
 
@@ -267,14 +355,25 @@ const blowHint = document.getElementById('blowHint');
 const subWrap = document.getElementById('subWrap');
 const subCat = document.getElementById('subCat');
 const subTh = document.getElementById('subTh');
+// Ensure the start-music prompt is hidden initially; it will be shown only after the cake appears
+const musicPrompt = document.getElementById('musicPrompt');
+try{ musicPrompt && musicPrompt.classList.remove('show'); }catch(e){}
 let hasCelebrated = false;
 
-// --- When the cat finishes walking in, play subtitles first, then show cake ---
-const forceShow = setTimeout(()=> startCake(), 9000); // fallback
+// --- When the cat finishes walking in, play subtitles first, then show tap prompt ---
+function showTapPrompt(){
+  const mp = document.getElementById('musicPrompt');
+  if(mp){
+    document.body.classList.add('await-tap'); // ซ่อนฉากทั้งหมดตอนรอแตะ
+    mp.classList.add('show');
+    mp.style.display='grid';
+  }
+}
+const forceShow = setTimeout(()=> showTapPrompt(), 9000); // fallback
 catWrap.addEventListener('animationend', (e)=>{
   if(e.animationName!=='walkIn') return;
   clearTimeout(forceShow);
-  playSubtitles(startCake);
+  playSubtitles(showTapPrompt);
 }, {once:true});
 
 function startCake(){
@@ -282,15 +381,14 @@ function startCake(){
   catWrap.style.display = 'none';
   subWrap.classList.remove('show'); subWrap.classList.add('hide');
   dim.classList.add('on'); glow.classList.add('on'); cakeAssembly.style.display='block';
-  // Show start-music prompt to guide users (esp. on mobile)
-  document.getElementById('musicPrompt').classList.add('show');
+  // Cake only; tap prompt already handled before calling startCake
 }
 
 // ===== Subtitles logic =====
 const LINES = [
-  {cat:'Meow~ meow meow! 🎁', th:'วันนี้วันเกิดไนท์ไนท์นี่หน่า'},
-  {cat:'Meow… meow meow 🎂', th:'ไคโรเอาเค้กมาให้'},
-  {cat:'Meow… meooow~ 💨', th:'จุดเทียนสักครู่...'}
+  {cat:'Meow~ meow meow! 🎁', th:'วันนี้วันเกิดนั้ยน้ายยย'},
+  {cat:'Meow… meow meow 🎂', th:'ไคโรเอาเค้กมาหั้ย'},
+  {cat:'Meow… meooow~🎶', th:'มาร้องเพลงกัน~'}
 ];
 const SHOW_MS = 3200; // slower display time per line
 const GAP_MS = 400;   // slightly longer gap
@@ -363,7 +461,6 @@ function loopMic(){ requestAnimationFrame(loopMic); if(!analyser) return;
   else{ overFrames=0; }
 }
 window.addEventListener('load', enableMic);
-window.addEventListener('pointerdown', ()=>{ if(!micStream) enableMic(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); playHappyBirthday().catch(()=>{}); }, {once:true});
 
 // Music
 let _pendingMusic=false;
@@ -393,6 +490,28 @@ function showWishSequence(){
   show('หลับตาแล้วอธิษฐานเลย🪄');
   setTimeout(()=>{ show('เป่าเค้กเลยย 🎂💨'); window._canBlow = true; setTimeout(hide, 7000); }, 7000);
 }
+
+// Start-music overlay: tap to start audio when cake appears
+(function(){
+  const overlay = document.getElementById('musicPrompt');
+  const btn = document.getElementById('musicStartBtn');
+  if(overlay && btn){
+const start = ()=>{
+  try{
+    if(!micStream) enableMic();
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){}
+  playHappyBirthday().finally(()=>{
+    overlay.style.display='none';
+    overlay.classList.remove('show');
+    document.body.classList.remove('await-tap'); // คืนฉากกลับมา
+    startCake();
+  });
+};
+    overlay.addEventListener('click', start);
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); start(); });
+  }
+})();
 
 // === Celebration helpers ===
 function turnOnLights(){
