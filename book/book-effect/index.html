@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <link rel="stylesheet" href="style.css" />
   <title>Flipbook — Responsive (turn.js)</title>
 </head>
@@ -38,16 +38,27 @@
     <div class="ap-info">
       <div class="ap-title" id="ap_title">—</div>
       <div class="ap-bar">
-        <button id="ap_prev"  aria-label="Previous" title="ก่อนหน้า">⏮</button>
-        <button id="ap_toggle" aria-label="Play / Pause" title="Play / Pause">▶</button>
-        <button id="ap_next"  aria-label="Next" title="ถัดไป">⏭</button>
-        <input id="ap_seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="Seek" />
+        <button id="ap_prev"  class="icon" aria-label="ก่อนหน้า" title="ก่อนหน้า">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12L18 5v14L7 12zm-1 7H4V5h2v14z"/></svg>
+        </button>
+        <button id="ap_toggle" class="icon" data-state="play" aria-label="เล่น/พัก" title="เล่น/พัก">
+          <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ic-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button id="ap_next"  class="icon" aria-label="ถัดไป" title="ถัดไป">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19V5l11 7-11 7zm12 0h2V5h-2v14z"/></svg>
+        </button>
+        <input id="ap_seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="เลื่อนเวลา" />
         <span id="ap_time">0:00</span>
-        <button id="ap_hide"  aria-label="Hide" title="ซ่อนแถบ">▾</button>
+        <button id="ap_hide"  class="icon" aria-label="ซ่อนแถบ" title="ซ่อนแถบ">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5H7z"/></svg>
+        </button>
       </div>
     </div>
   </div>
-  <button class="audio-fab" id="ap_fab" aria-label="Show player" title="แสดงเครื่องเล่น">▲</button>
+  <button class="audio-fab" id="ap_fab" aria-label="แสดงแถบเพลง" title="แสดงแถบเพลง">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14l5-5 5 5H7z"/></svg>
+  </button>
   <audio id="bgm" preload="metadata"></audio>
 
   <script src="jquery.js"></script>
@@ -179,13 +190,14 @@
       audio.volume = 0.4;
       const fmt = (s)=>{ s=Math.max(0, s|0); const m=(s/60)|0; const ss=('0'+(s%60)).slice(-2); return m+':'+ss; };
       function update(){ if(!isNaN(audio.duration)){ seek.max = audio.duration; } seek.value = audio.currentTime||0; timeEl.textContent = fmt(audio.currentTime||0); }
-      toggle.addEventListener('click', ()=>{ if(audio.paused){ audio.play(); toggle.textContent='❚❚'; player.classList.add('playing'); } else { audio.pause(); toggle.textContent='▶'; player.classList.remove('playing'); } });
+      function setPlayingUI(on){ if(on){ player.classList.add('playing'); toggle.setAttribute('data-state','pause'); } else { player.classList.remove('playing'); toggle.setAttribute('data-state','play'); } }
+      toggle.addEventListener('click', ()=>{ if(audio.paused){ audio.play(); setPlayingUI(true); } else { audio.pause(); setPlayingUI(false); } });
       prevBtn.addEventListener('click', ()=>{ if(PLAYLIST.length>1){ load(index-1); audio.play(); toggle.textContent='❚❚'; }});
       nextBtn.addEventListener('click', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); toggle.textContent='❚❚'; }});
       seek.addEventListener('input', ()=>{ try{ audio.currentTime = +seek.value; }catch(e){} });
       audio.addEventListener('timeupdate', update);
       audio.addEventListener('loadedmetadata', update);
-      audio.addEventListener('ended', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); } else { toggle.textContent='▶'; player.classList.remove('playing'); } });
+      audio.addEventListener('ended', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); } else { setPlayingUI(false); } });
 
       // Hide / show player
       hideBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); player.classList.add('collapsed'); fabBtn.classList.add('show'); });
@@ -200,9 +212,15 @@
           sessionStorage.removeItem('autoplay');
           let attempts = 0;
           const tryPlay = () => {
-            audio.play().then(()=>{ toggle.textContent='❚❚'; player.classList.add('playing'); })
+            audio.play().then(()=>{ setPlayingUI(true); })
             .catch(()=>{ if(attempts++ < 6) setTimeout(tryPlay, 350); });
           };
+          const passed = sessionStorage.getItem('autoplaySong');
+          if(passed){
+            const idx = PLAYLIST.findIndex(p=> p.endsWith(passed.replace('../','')) || p.endsWith(passed));
+            if(idx>=0){ load(idx); }
+            sessionStorage.removeItem('autoplaySong');
+          }
           tryPlay();
         }
       } catch(e) {}

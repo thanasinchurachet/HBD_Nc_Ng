@@ -113,6 +113,12 @@ body.lights-on{
 /* Wish hint above cake */
 .wish-hint{ position:absolute; left:50%; top:38%; transform: translateX(-50%); color:#fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); font-weight:600; font-size: clamp(14px, 2.2vmin, 18px); background: rgba(0,0,0,.25); padding:.4rem .8rem; border-radius: 999px; opacity:0; pointer-events:none; z-index:6 }
 .wish-hint.show{ animation: subFadeIn .6s cubic-bezier(.2,.8,.2,1) forwards; } .wish-hint.hide{ animation: subFadeOut .6s cubic-bezier(.2,.8,.2,1) forwards; }
+/* Music start prompt */
+.music-prompt{ position:absolute; inset:0; display:none; place-items:center; background: radial-gradient(1200px 800px at 50% 50%, rgba(0,0,0,.35), rgba(0,0,0,.55)); z-index:7 }
+.music-prompt.show{ display:grid }
+.mp-card{ background:#fff; color:#333; border-radius:14px; padding:16px 18px; width:min(90vw, 360px); box-shadow:0 12px 28px rgba(0,0,0,.25); text-align:center }
+.mp-title{ font-weight:700; margin-bottom:10px }
+.mp-btn{ border:0; background:#4a3bff; color:#fff; padding:10px 16px; border-radius:999px; font-weight:700; cursor:pointer; box-shadow:0 8px 16px rgba(0,0,0,.18) }
 /* Musical notes while song playing */
 .notes{ position:absolute; inset:0; pointer-events:none; display:none; z-index:6 }
 .notes.show{ display:block }
@@ -199,6 +205,12 @@ body.lights-on{
   <div id="textRain"></div>
   <div class="wish-hint" id="wishHint"></div>
   <div class="notes" id="musicNotes"></div>
+  <div class="music-prompt" id="musicPrompt" aria-modal="true" role="dialog">
+    <div class="mp-card">
+      <div class="mp-title">เริ่มเพลงก่อนเป่าเค้ก</div>
+      <button id="musicStartBtn" class="mp-btn" aria-label="เริ่มเพลง">แตะเพื่อเริ่มเพลง 🎵</button>
+    </div>
+  </div>
 </div>
 
 <!-- Envelope overlay to reveal the book -->
@@ -270,12 +282,8 @@ function startCake(){
   catWrap.style.display = 'none';
   subWrap.classList.remove('show'); subWrap.classList.add('hide');
   dim.classList.add('on'); glow.classList.add('on'); cakeAssembly.style.display='block';
-  // Music
-  try{ _pendingMusic = true; }catch(e){}
-  playHappyBirthday().catch(()=>{
-    const w = document.getElementById('wishHint');
-    if(w){ w.textContent='แตะหน้าจอหนึ่งครั้งเพื่อเริ่มเพลง 🎵'; w.classList.add('show'); setTimeout(()=>w.classList.remove('show'), 1600); }
-  });
+  // Show start-music prompt to guide users (esp. on mobile)
+  document.getElementById('musicPrompt').classList.add('show');
 }
 
 // ===== Subtitles logic =====

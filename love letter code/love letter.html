@@ -42,7 +42,16 @@
           val.classList.add('open');
           setTimeout(()=>{
             val.classList.add('pull');
-            setTimeout(()=>{ try{ sessionStorage.setItem('autoplay','1'); }catch(e){} window.location.href = '../book/book-effect/index.html'; }, 900);
+            setTimeout(()=>{
+              try{
+                // Prime autoplay: play muted momentarily under this user gesture
+                const first = new Audio('../music/ทะเลสีดำ.mp3');
+                first.muted = true; first.play().then(()=>{ first.pause(); first.src=''; });
+                sessionStorage.setItem('autoplay','1');
+                sessionStorage.setItem('autoplaySong','../music/ทะเลสีดำ.mp3');
+              }catch(e){}
+              window.location.href = '../book/book-effect/index.html';
+            }, 900);
           }, 500);
         }, 500);
       });
