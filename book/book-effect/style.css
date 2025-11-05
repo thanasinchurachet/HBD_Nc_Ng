@@ -62,6 +62,18 @@ body {
 .audio-player input[type="range"]{ width: 180px; accent-color:#4a3bff; }
 .audio-player span{ font-size: 12px; color:#333; min-width: 40px; text-align:right; }
 
+/* Loading state: show spinner in the time slot */
+.audio-player.loading #ap_time{ color: transparent; position: relative; }
+.audio-player.loading #ap_time::after{
+    content: "";
+    display: inline-block; width: 14px; height: 14px; vertical-align: -2px;
+    border: 2px solid #666; border-top-color: transparent; border-radius: 50%;
+    animation: ap-spin .8s linear infinite;
+}
+
+/* Dim and disable interactions on the seek bar while loading */
+.audio-player input[type="range"]:disabled{ opacity: .5; pointer-events: none; }
+
 .audio-player .ap-bar button#ap_prev,
 .audio-player .ap-bar button#ap_next{
     background: linear-gradient(180deg,#f0efff,#dadaff); color:#2c2c7a; width:34px; height:34px;

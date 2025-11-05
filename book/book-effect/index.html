@@ -184,6 +184,7 @@
         // Set default cover (you can change this file)
         apCover.src = '../../music/poster.gif';
         apCover.style.display = 'block';
+        setLoadingUI(true);
         audio.load();
       }
       load(0);
@@ -191,13 +192,61 @@
       const fmt = (s)=>{ s=Math.max(0, s|0); const m=(s/60)|0; const ss=('0'+(s%60)).slice(-2); return m+':'+ss; };
       function update(){ if(!isNaN(audio.duration)){ seek.max = audio.duration; } seek.value = audio.currentTime||0; timeEl.textContent = fmt(audio.currentTime||0); }
       function setPlayingUI(on){ if(on){ player.classList.add('playing'); toggle.setAttribute('data-state','pause'); } else { player.classList.remove('playing'); toggle.setAttribute('data-state','play'); } }
-      toggle.addEventListener('click', ()=>{ if(audio.paused){ audio.play(); setPlayingUI(true); } else { audio.pause(); setPlayingUI(false); } });
-      prevBtn.addEventListener('click', ()=>{ if(PLAYLIST.length>1){ load(index-1); audio.play(); toggle.textContent='❚❚'; }});
-      nextBtn.addEventListener('click', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); toggle.textContent='❚❚'; }});
+      // Loading UI toggle + disable seek while buffering
+      seek.disabled = true;
+      function setLoadingUI(on){
+        if(on){ player.classList.add('loading'); seek.disabled = true; }
+        else { player.classList.remove('loading'); if(!isNaN(audio.duration)) seek.disabled = false; }
+      }
+
+      // Stable play/pause handling with promises
+      toggle.addEventListener('click', ()=>{
+        if(audio.paused){
+          setLoadingUI(true);
+          audio.play()
+            .then(()=>{ setPlayingUI(true); })
+            .catch(()=>{ /* autoplay blocked or error */ })
+            .then(()=>{ setLoadingUI(false); });
+        } else {
+          audio.pause();
+          setPlayingUI(false);
+        }
+      });
+      prevBtn.addEventListener('click', ()=>{
+        if(PLAYLIST.length>1){
+          load(index-1);
+          setLoadingUI(true);
+          audio.play()
+            .then(()=>{ setPlayingUI(true); })
+            .catch(()=>{ setPlayingUI(false); })
+            .then(()=>{ setLoadingUI(false); });
+        }
+      });
+      nextBtn.addEventListener('click', ()=>{
+        if(PLAYLIST.length>1){
+          load(index+1);
+          setLoadingUI(true);
+          audio.play()
+            .then(()=>{ setPlayingUI(true); })
+            .catch(()=>{ setPlayingUI(false); })
+            .then(()=>{ setLoadingUI(false); });
+        }
+      });
       seek.addEventListener('input', ()=>{ try{ audio.currentTime = +seek.value; }catch(e){} });
       audio.addEventListener('timeupdate', update);
-      audio.addEventListener('loadedmetadata', update);
+      audio.addEventListener('loadedmetadata', ()=>{ update(); if(!isNaN(audio.duration)) seek.disabled = false; });
       audio.addEventListener('ended', ()=>{ if(PLAYLIST.length>1){ load(index+1); audio.play(); } else { setPlayingUI(false); } });
+
+      // Update loading indicator based on media events
+      audio.addEventListener('loadstart', ()=> setLoadingUI(true));
+      audio.addEventListener('waiting',   ()=> setLoadingUI(true));
+      audio.addEventListener('seeking',   ()=> setLoadingUI(true));
+      audio.addEventListener('stalled',   ()=> setLoadingUI(true));
+      audio.addEventListener('canplay',   ()=> setLoadingUI(false));
+      audio.addEventListener('canplaythrough', ()=> setLoadingUI(false));
+      audio.addEventListener('playing',   ()=> setLoadingUI(false));
+      audio.addEventListener('seeked',    ()=> setLoadingUI(false));
+      audio.addEventListener('pause',     ()=> setPlayingUI(false));
 
       // Hide / show player
       hideBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); player.classList.add('collapsed'); fabBtn.classList.add('show'); });
@@ -227,7 +276,11 @@
       // Fallback: first interaction starts audio if paused
       window.addEventListener('pointerdown', ()=>{
         if (audio.paused) {
-          audio.play().then(()=>{ toggle.textContent='❚❚'; player.classList.add('playing'); }).catch(()=>{});
+          setLoadingUI(true);
+          audio.play()
+            .then(()=>{ setPlayingUI(true); })
+            .catch(()=>{})
+            .then(()=>{ setLoadingUI(false); });
         }
       }, { once:true });
     })();
