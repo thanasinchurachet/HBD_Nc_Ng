@@ -143,7 +143,6 @@ body.lights-on{
   display: flex;
   align-items: center;
   gap: 14px;
-
 }
 .mp-label {
   letter-spacing: .2px;
@@ -336,6 +335,8 @@ body.await-tap .stage > *:not(.music-prompt){ visibility:hidden !important }
       animation: babyEnter 2.2s cubic-bezier(.18,.9,.22,1) forwards, babyWobble .6s ease-in-out infinite; transform-origin:50% 90%; }
     @keyframes babyEnter{ from{ transform: translateX(-120vw); } to{ transform: translateX(0); } }
     @keyframes babyWobble{ 0%,100%{ transform: translateY(0) rotate(1.2deg) } 50%{ transform: translateY(-6px) rotate(-1.2deg) } }
+    /* Thai subtitle color for baby only */
+    #babySubWrap .sub-th{ color:#000 !important; }
   </style>
 </div>
 <!-- Baby overlay (appears after celebration, before envelope) -->
@@ -718,6 +719,10 @@ function showBabyThenEnvelope(){
   const bo = document.getElementById('babyOverlay');
   if(!bo){ showEnvelope(); return; }
   bo.classList.add('show');
+  // Disable blow interaction and hide hint while baby is shown
+  try{ window._canBlow = false; }catch(e){}
+  try{ hintCooldown = true; clearTimeout(hintTimer); }catch(e){}
+  try{ if(blowHint){ blowHint.classList.remove('show'); blowHint.style.display='none'; } }catch(e){}
   // hide cake while showing baby
   try{ cakeAssembly.style.display='none'; }catch(e){}
   const img = bo.querySelector('.baby');
