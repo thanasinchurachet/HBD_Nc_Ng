@@ -388,10 +388,16 @@ function startCake(){
 const LINES = [
   {cat:'Meow~ meow meow! 🎁', th:'วันนี้วันเกิดนั้ยน้ายยย'},
   {cat:'Meow… meow meow 🎂', th:'ไคโรเอาเค้กมาหั้ย'},
+  {cat:'Meow… meow meow meow ✈️', th:'สินสินไปฝึกงานกรุงเต้บ'},
+  {cat:'Meow…meow meow', th:'ไม่ได้อยู่เป่าเค้กกับไนท์ในจริง🥹'},
+  {cat:'Meow…meow meow', th:'ไนท์เป่าในนี้ไปก่องนะ🕯️'},
   {cat:'Meow… meooow~🎶', th:'มาร้องเพลงกัน~'}
+
 ];
-const SHOW_MS = 3200; // slower display time per line
-const GAP_MS = 400;   // slightly longer gap
+const TYPE_PER_CHAR_MS = 85;       // ความเร็วพิมพ์ต่ออักขระ (มิลลิวินาที)
+const AFTER_TYPE_HOLD_MS = 1100;   // เวลาค้างหลังพิมพ์จบในแต่ละบรรทัด
+const GAP_MS = 500;                // ช่องว่างระหว่างบรรทัด
+// เดิมใช้ SHOW_MS คุมเวลา ตอนนี้คำนวณตามการพิมพ์ + ค้างแทน
 
 // talking mouth: swap images while subtitle visible
 let talkTimer=null, talking=false;
@@ -402,14 +408,44 @@ function startTalking(){
 }
 function stopTalking(){ talking=false; clearInterval(talkTimer); catImg.src='img/cat01.png'; }
 
+function typeText(el, text, msPerChar){
+  return new Promise((resolve)=>{
+    try{
+      const chars = Array.from(text); // รองรับอีโมจิ/ยูนิโค้ด
+      el.textContent = '';
+      if(chars.length === 0){ resolve(); return; }
+      let idx=0;
+      const timer = setInterval(()=>{
+        el.textContent += chars[idx++];
+        if(idx >= chars.length){ clearInterval(timer); resolve(); }
+      }, Math.max(15, msPerChar|0));
+    }catch(e){ el.textContent = text; resolve(); }
+  });
+}
+
 function playSubtitles(doneCb){
   let i=0; subWrap.classList.remove('hide');
   function next(){
-    if(i>=LINES.length){ stopTalking(); subWrap.classList.remove('show'); subWrap.classList.add('hide'); if(typeof doneCb==='function') setTimeout(doneCb, 250); return; }
+    if(i>=LINES.length){
+      stopTalking();
+      subWrap.classList.remove('show');
+      subWrap.classList.add('hide');
+      if(typeof doneCb==='function') setTimeout(doneCb, 250);
+      return;
+    }
     const {cat, th} = LINES[i++];
-    subCat.textContent = cat; subTh.textContent = th;
-    subWrap.classList.add('show'); startTalking();
-    setTimeout(()=>{ subWrap.classList.remove('show'); subWrap.classList.add('hide'); setTimeout(()=>{ subWrap.classList.remove('hide'); next(); }, GAP_MS); }, SHOW_MS);
+    subWrap.classList.add('show');
+    startTalking();
+    Promise.all([
+      typeText(subCat, cat, TYPE_PER_CHAR_MS),
+      typeText(subTh, th, Math.max(60, TYPE_PER_CHAR_MS - 10))
+    ]).then(()=>{
+      setTimeout(()=>{
+        subWrap.classList.remove('show');
+        subWrap.classList.add('hide');
+        setTimeout(()=>{ subWrap.classList.remove('hide'); next(); }, GAP_MS);
+      }, AFTER_TYPE_HOLD_MS);
+    });
   }
   next();
 }
@@ -420,7 +456,7 @@ const candles = Array.from(document.querySelectorAll('.candle')).map(el=>{
   const smoke=document.createElement('div'); smoke.className='smoke';
   el.appendChild(flame); el.appendChild(smoke);
   smoke.addEventListener('animationend', ()=>{ smoke.classList.remove('show'); smoke.style.opacity=0; });
-  el.addEventListener('click',()=>{ if(!window._canBlow){ const w=document.getElementById('wishHint'); if(w){ w.textContent='รอให้เพลงจบก่อนน้า 🎵'; w.classList.add('show'); setTimeout(()=>w.classList.remove('show'), 1200);} return; } if(el._lit!==false) extinguish(el); });
+  el.addEventListener('click',()=>{ if(!window._canBlow){ const w=document.getElementById('wishHint'); if(w){ w.textContent='รอให้เพลงจบก่องนะ 🎵'; w.classList.add('show'); setTimeout(()=>w.classList.remove('show'), 1200);} return; } if(el._lit!==false) extinguish(el); });
   el._lit=true;
   return {el, flame, smoke};
 });
